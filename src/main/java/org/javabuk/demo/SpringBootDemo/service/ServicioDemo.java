@@ -1,5 +1,8 @@
 package org.javabuk.demo.SpringBootDemo.service;
 
+/**
+ * Interaface que define las funcionalidades del Servicio Demo
+ */
 public interface ServicioDemo {
 
     /**
