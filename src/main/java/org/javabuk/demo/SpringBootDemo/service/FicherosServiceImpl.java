@@ -1,5 +1,7 @@
 package org.javabuk.demo.SpringBootDemo.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -10,18 +12,22 @@ import java.nio.file.Paths;
 
 public class FicherosServiceImpl implements FicherosService {
 
+
+    private TratamientoTextoService tratamientoTextoService;
+
+    @Autowired
+    public FicherosServiceImpl(TratamientoTextoService tratamientoTextoService) {
+        this.tratamientoTextoService = tratamientoTextoService;
+    }
+
     @Override
     public void grabarFichero(String rutaFichero, String textoFichero, Charset encoding) {
-
         Path path = Paths.get(rutaFichero);
-        //Creating a BufferedWriter object
         try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
-            //Appending the UTF-8 String to the file
-            writer.append(textoFichero);
-            //Flushing data to the file
-            writer.flush();
+            writer.append(tratamientoTextoService.convertirStringEncoding(textoFichero,encoding)).flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 }
