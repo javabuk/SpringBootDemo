@@ -1,13 +1,13 @@
 package org.javabuk.demo.SpringBootDemo.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class ServicioHorarioImpl implements  ServicioHorario{
 
     @Override
-    public boolean cumpleCondiciones(String condicionDiaria) {
+    public boolean cumpleCondiciones(String condicionDiaria, Date fecha) {
         // Comprobamos si viene más de una condición
         /*
         Comprobar que viene el caracter #, es el que utilizamos en las condiciones para representar la operación OR
@@ -20,24 +20,40 @@ public class ServicioHorarioImpl implements  ServicioHorario{
             condicionesDiarias.add(condicionDiaria);
         }
 
+        String [] diasCondicion = null;
+        for (String condicion: condicionesDiarias) {
+            // Validamos condición diaria
+            boolean validacion = true;
+            validacion = condicion.matches("L|M|X|J|V|S|D|-");
+            if(!validacion){
+                validacion = false;
+            }
+            if(condicion.startsWith("-") || condicion.endsWith("-") ){
+                validacion = false;
+            }
 
+            if(validacion){
+                diasCondicion = condicion.split("-");
+            }
+
+        }
         // Validamos el formato de la condicion
         /*
          Días semana sueltos: Empiezan por S=
-         L - Lunes
-         M - Martes
-         X - Miercoles
-         J - Jueves
-         V - Viernes
-         S - Sabado
-         D - Domingo
+         L - Lunes (2)
+         M - Martes (3)
+         X - Miercoles (4)
+         J - Jueves (5)
+         V - Viernes (6)
+         S - Sabado (7)
+         D - Domingo (1)
          Agrupación de días, con guion
          L-M : Lunes y martes
          M-X-V : Martes, miércoles y viernes
 
          Agrupación días seguidos
-         L:V : De lunes a viernes
-         V:D : De viernes a domingo
+         L=V : De lunes a viernes
+         V=D : De viernes a domingo
 
          Ejemplos
          S=L:V
@@ -68,7 +84,6 @@ public class ServicioHorarioImpl implements  ServicioHorario{
         */
 
 
-
         // Comprobamos si cumple la condición
         /*
         * Recuperar los datos de la fecha en cada caso:
@@ -78,7 +93,31 @@ public class ServicioHorarioImpl implements  ServicioHorario{
         *
         * */
 
-        return false;
+        return validarCondiciones(diasCondicion, fecha);
+    }
+
+
+    private boolean validarCondiciones(String [] condiciones, Date fecha){
+        boolean resultado = false;
+        int diaSemana = 0;
+        try {
+            diaSemana = obtenerDiaSemana(fecha);
+        } catch (ParseException e) {
+            return false;
+        }
+        for (String condicion : condiciones) {
+            //TODO: Comprobar si es nulo o no
+            if(DiasSemanaEnum.getCorrelacion(condicion).getCodigo()==diaSemana){
+                return true;
+            }
+        }
+        return resultado;
+    }
+
+    private int obtenerDiaSemana(Date fecha) throws ParseException {
+        Calendar calendario = Calendar.getInstance();
+        calendario.setTime(fecha);
+        return calendario.get(Calendar.DAY_OF_WEEK);
     }
 
 }
