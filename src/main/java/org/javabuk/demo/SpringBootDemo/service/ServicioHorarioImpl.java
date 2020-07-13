@@ -9,34 +9,41 @@ public class ServicioHorarioImpl implements  ServicioHorario{
     @Override
     public boolean cumpleCondiciones(String condicionDiaria, Date fecha) {
         // Comprobamos si viene más de una condición
-        /*
-        Comprobar que viene el caracter #, es el que utilizamos en las condiciones para representar la operación OR
-        * */
-        List<String> condicionesDiarias = new ArrayList<>();
-        if(condicionDiaria.contains("#")){
-            String [] arrCondiciones = condicionDiaria.split("#");
-            condicionesDiarias = Arrays.asList(arrCondiciones);
-        }else{
-            condicionesDiarias.add(condicionDiaria);
-        }
+
+        List<String> condicionesDiarias = obtenerCondiciones(condicionDiaria);
 
         String [] diasCondicion = null;
+        boolean validacion = true;
         for (String condicion: condicionesDiarias) {
             // Validamos condición diaria
-            boolean validacion = true;
+
             validacion = condicion.matches("L|M|X|J|V|S|D|-");
+
             if(!validacion){
-                validacion = false;
+                // Si no cumple la condición salimos de las validaciones
+                return false;
             }
+
             if(condicion.startsWith("-") || condicion.endsWith("-") ){
                 validacion = false;
             }
 
-            if(validacion){
-                diasCondicion = condicion.split("-");
+            if(!validacion){
+                // Si no cumple la condición salimos de las validaciones
+                return false;
             }
 
+            diasCondicion = condicion.split("-");
+
+            validacion = validarCondiciones(diasCondicion, fecha);
+            if(!validacion){
+                // Si no cumple la condición salimos de las validaciones
+                return false;
+            }
         }
+
+        return true;
+
         // Validamos el formato de la condicion
         /*
          Días semana sueltos: Empiezan por S=
@@ -93,7 +100,21 @@ public class ServicioHorarioImpl implements  ServicioHorario{
         *
         * */
 
-        return validarCondiciones(diasCondicion, fecha);
+
+    }
+
+    private List<String> obtenerCondiciones(String condicionDiaria) {
+         /*
+        Comprobar que viene el caracter #, es el que utilizamos en las condiciones para representar la operación OR
+        * */
+        List<String> condicionesDiarias = new ArrayList<>();
+        if(condicionDiaria.contains("#")){
+            String [] arrCondiciones = condicionDiaria.split("#");
+            condicionesDiarias = Arrays.asList(arrCondiciones);
+        }else{
+            condicionesDiarias.add(condicionDiaria);
+        }
+        return condicionesDiarias;
     }
 
 
